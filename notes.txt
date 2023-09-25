@@ -1,0 +1,4 @@
+headers
+    packet_type
+        1 --> broker announces stream
+        2 --> broker broadcasts data
