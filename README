@@ -1,4 +1,15 @@
-headers
+Headers:
     packet_type
-        1 --> broker announces stream
-        2 --> broker broadcasts data
+        1 --> producer to broker
+                format: 'b 6s b'
+                packet_type (1 byte), producer_ID (3 bytes) + stream_number (1 byte)
+        2 --> producer broadcasts data to broker
+                format: 'b 6s b i i'
+                packet_type (1 byte), producer_ID (3 bytes) + stream_number (1 byte), frame (4 bytes), payload_size (4 bytes)
+
+
+Making containers:
+    docker create -ti --name broker --cap-add=all -v /Users/hazelhilbert/Documents/GitHub/NetworksA1:/compnets pythonimage /bin/bash
+    docker network connect csnet broker
+    docker start -i broker  
+    python3 broker.py

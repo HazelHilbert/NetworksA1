@@ -1,12 +1,11 @@
-import socket, struct
+import socket
+from header import *
 
 localIP     = "broker"
 localPort   = 50000
 bufferSize  = 1024
 
 # header from producer 
-header_format_1 = 'b 6s b'
-header_format_2 = 'b 6s b i i'
 
 msgFromServer       = "Hello UDP Producer"
 bytesToSend         = str.encode(msgFromServer)
@@ -25,16 +24,10 @@ while(True):
     data = bytesAddressPair[0]
     address = bytesAddressPair[1]
 
-    packet_type = data[0]
-    if packet_type == 1:
-        header_format = header_format_1
-    elif packet_type == 2:
-        header_format = header_format_2
+    header = data[:get_header_length(data)]
+    payload = data[get_header_length(data):]
 
-    header = data[:struct.calcsize(header_format)]
-    payload = data[struct.calcsize(header_format):]
-
-    if packet_type <= 2:
+    if data[0] <= 2:
         producertMsg = "Message from Producer:{}".format(payload)
         producerIP  = "Producer IP Address:{}".format(address)
     
