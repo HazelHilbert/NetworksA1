@@ -12,7 +12,7 @@ def send_data(bytesToSend):
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
     msgFromServer = UDPClientSocket.recvfrom(bufferSize)
-    msg = "Message from broker {}".format(msgFromServer[0])
+    msg = "Message from broker {}".format(msgFromServer[0].decode('utf-8'))
     print(msg)
 
 # Ask for producer ID
@@ -28,7 +28,7 @@ while not valid:
 stream_list = []
 # allows producer to continusly announce streams or publish content
 while True:
-    action_input = input("Choose action (enter number):\n 1 --> Announce Stream\n 2 --> Publish Content\n 3 --> Quit\n")
+    action_input = input("Choose action (enter number):\n   1 --> Announce Stream\n   2 --> Publish Content\n   3 --> Quit\n")
 
     # Anounce stream
     if action_input == '1':
@@ -53,7 +53,7 @@ while True:
         header = make_header_1(packet_type, producer_ID, new_stream_number)
 
         # data payload
-        payload = str.encode(str(producer_ID) + ", adding stream: " + str(new_stream_number))
+        payload = str.encode(str(producer_ID.decode('utf-8')) + ", adding stream: " + str(new_stream_number))
         
         send_data(header + payload)
 
@@ -96,7 +96,7 @@ while True:
                 header = make_header_2(packet_type, producer_ID, stream_number, frame, payload_size)
 
                 # data payload
-                payload = str.encode(str(producer_ID) + ", stream: " + str(stream_number) + ", frame: " + str(frame) + ", payload size: " + str(payload_size))
+                payload = str.encode(str(producer_ID.decode('utf-8')) + ", stream: " + str(stream_number) + ", frame: " + str(frame) + ", payload size: " + str(payload_size))
                 
                 send_data(header + payload)
 

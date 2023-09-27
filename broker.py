@@ -7,7 +7,7 @@ bufferSize  = 1024
 
 # header from producer 
 
-msgFromServer       = "Hello UDP Producer"
+msgFromServer       = "Received"
 bytesToSend         = str.encode(msgFromServer)
 
 # Create a datagram socket
@@ -23,16 +23,23 @@ while(True):
     bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
     data = bytesAddressPair[0]
     address = bytesAddressPair[1]
+    packet_type = data[0]
 
     header = data[:get_header_length(data)]
     payload = data[get_header_length(data):]
 
-    if data[0] <= 2:
-        producertMsg = "Message from Producer:{}".format(payload)
-        producerIP  = "Producer IP Address:{}".format(address)
+    message_start = ''
+    if packet_type == 1:
+        message_start = "Received producer: "
+    elif packet_type == 2:
+        message_start = "Announced producer: "
+
+    producertMsg = message_start + format(payload.decode('utf-8'))
+    producerIP  = "IP Address:{}".format(address)
     
-        print(producertMsg)
-        print(producerIP)
+    print(producertMsg)
+    print(producerIP)
+        
 
     # Sending a reply
     UDPServerSocket.sendto(bytesToSend, address)
