@@ -8,14 +8,13 @@ def send_data(bytesToSend):
 
     # Create a UDP socket at client side
     UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-
+    
     # Send to server using created UDP socket
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
     msgFromServer = UDPClientSocket.recvfrom(bufferSize)
     msg = "Message from broker {}".format(msgFromServer[0].decode('utf-8'))
     print(msg)
-
 
 # allows producer to continusly announce streams or publish content
 while True:
@@ -47,25 +46,26 @@ while True:
                         payload = str.encode(str("Unsubscribe request for all streams from: " + producer_ID.decode('utf-8')))
                     
                     header = make_header_3(packet_type, producer_ID)
-                                
+                    send_data(header + payload)
+                
                 elif 0 <= int(stream_input) <= 127:
                     valid = True
                     new_stream_number = int(stream_input)
                     if action_input == '1': 
                         packet_type = 5
-                        payload = str.encode(str("Subscription request for stream: " + new_stream_number + " from: " + producer_ID.decode('utf-8')))
+                        payload = str.encode(str("Subscription request for stream: " + str(new_stream_number) + " from: " + producer_ID.decode('utf-8')))
                     elif action_input == '2':
                         packet_type = 6
-                        payload = str.encode(str("Unsubscribe request for stream: " + new_stream_number + " from: " + producer_ID.decode('utf-8')))
+                        payload = str.encode(str("Unsubscribe request for stream: " + str(new_stream_number) + " from: " + producer_ID.decode('utf-8')))
                     
                     header = make_header_1(packet_type, producer_ID, new_stream_number)
+                    send_data(header + payload)
+            
                 else:
                     print("Invalid stream number: enter int [0, 127]")
             except:
                 if valid == False:
                     print("Invalid stream number: enter int [0, 127]")
-
-        send_data(header + payload)
 
     elif action_input == '3':
         break

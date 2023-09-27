@@ -33,6 +33,10 @@ while(True):
         message_start = "Received producer: "
     elif packet_type == 2:
         message_start = "Announced producer: "
+    elif packet_type == 3 or packet_type == 4 or packet_type == 5 or packet_type == 6:
+        message_start = "Consumer: "
+    else:
+        message_start = "ERROR "
 
     producertMsg = message_start + format(payload.decode('utf-8'))
     producerIP  = "IP Address:{}".format(address)

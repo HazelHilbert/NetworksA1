@@ -7,7 +7,7 @@ def make_header_2(packet_type, producer_ID, stream_number, frame, payload_size):
     return struct.pack(get_header_format(packet_type), packet_type, producer_ID, stream_number, frame, payload_size)
 
 def make_header_3(packet_type, producer_ID):
-    return struct.pack(get_header_format(packet_type), packet_type, producer_ID)
+    return struct.pack(get_header_format(3), packet_type, producer_ID)
 
 def get_header_format(header):
     if type(header) == int:
