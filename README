@@ -1,19 +1,16 @@
 Headers:
     packet_type
         1 --> producer anounces stream to broker
-                format: 'b 6s b'
-                packet_type (1 byte), producer_ID (3 bytes) + stream_number (1 byte)
+                
         2 --> producer broadcasts data to broker
-                format: 'b 6s b i i'
-                packet_type (1 byte), producer_ID (3 bytes) + stream_number (1 byte), frame (4 bytes), payload_size (4 bytes)
-        3 --> broker broadcasts data to consumer
-                format: 'b 6s b i i'
-                packet_type (1 byte), producer_ID (3 bytes) + stream_number (1 byte), frame (4 bytes), payload_size (4 bytes)
-        3 --> consumer subscribes to stream from broker
-                format: 'b 6s b i i'
-                packet_type (1 byte), producer_ID (3 bytes) + stream_number (1 byte), frame (4 bytes), payload_size (4 bytes)
 
+        3 --> consumer subscribes all
 
+        4 --> consumer unsubscribes all
+
+        5 --> consumer subscribes to stream
+
+        6 --> consumer unsubscribes to stream
 
 Making containers:
     docker create -ti --name broker --cap-add=all -v /Users/hazelhilbert/Documents/GitHub/NetworksA1:/compnets pythonimage /bin/bash
