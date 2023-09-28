@@ -14,13 +14,16 @@ class UDM_Socket:
     
     def send_data_to(self, bytesToSend, addressPort):
         self.UDPSocket.sendto(bytesToSend, addressPort)
-        
+    
     def receive_data(self):
+        return self.UDPSocket.recvfrom(self.bufferSize)[0]
+
+    def receive_data_parsed(self):
         data = self.UDPSocket.recvfrom(self.bufferSize)
         
         packet_type = data[0][0]
-        header = data[0][:get_header_length(data)]
-        payload = data[0][get_header_length(data):]
+        header = data[0][:get_header_length(packet_type)]
+        payload = data[0][get_header_length(packet_type):]
         address = data[1]
 
         return (packet_type, header, payload, address)

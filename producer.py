@@ -46,6 +46,9 @@ while True:
         # send to broker
         producer_socket.send_data_to(header + payload, BROKER_ADDRESS)
 
+        # get response
+        print("Message from broker: " + producer_socket.receive_data().decode('utf-8'))
+
     # Publish content
     elif action_input == '2':
         packet_type = 2
@@ -90,6 +93,9 @@ while True:
                 
                 # send to broker
                 producer_socket.send_data_to(header + payload, BROKER_ADDRESS)
+                
+                # get response
+                print("Message from broker: " + producer_socket.receive_data().decode('utf-8'))
 
                 frame += 1
 

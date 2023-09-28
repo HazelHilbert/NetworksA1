@@ -21,7 +21,7 @@ while(True):
     #    st += str(c.address) + " " 
     #print(st)
     
-    data = broker_socket.receive_data()
+    data = broker_socket.receive_data_parsed()
     packet_type = data[0]
     header = data[1]
     payload = data[2]
@@ -51,6 +51,7 @@ while(True):
         
     elif packet_type == 2:
         message_start = "Received from producer: "
+
     
     elif 3 <= packet_type <= 6:
         producer_id = get_producer_id(header)
@@ -107,5 +108,16 @@ while(True):
     print(message_start + format(payload.decode('utf-8')))
     print("IP Address:{}".format(address))
 
+    # foward frames to consumers
+    if packet_type == 2:
+        producer_stream = get_producer_id(header) + get_stream_number(header)
+        print("Fowarding stream to consumers")
+        #new_header = 7 + header[1:]
+        for consumer in consumers:
+            if producer_stream in consumer.subscriptions:
+                broker_socket.send_data_to(header + payload, consumer.address)
+                print("Message from consumer " + str(consumer.address[0]) + ": " + broker_socket.receive_data().decode('utf-8'))
+    
     # send a reply
     broker_socket.send_data_to(str.encode(msgFromServer), address)
+

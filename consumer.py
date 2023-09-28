@@ -35,7 +35,10 @@ while True:
                     
                     header = make_header_3(packet_type, producer_ID)
                     consumer_socket.send_data_to(header + payload, BROKER_ADDRESS)
-                
+                    
+                    # get response
+                    print("Message from broker: " + consumer_socket.receive_data().decode('utf-8'))
+
                 elif 0 <= int(stream_input) <= 127:
                     valid = True
                     new_stream_number = int(stream_input)
@@ -48,6 +51,9 @@ while True:
                     
                     header = make_header_1(packet_type, producer_ID, new_stream_number)
                     consumer_socket.send_data_to(header + payload, BROKER_ADDRESS)
+                    
+                    # get response
+                    print("Message from broker: " + consumer_socket.receive_data().decode('utf-8'))
             
                 else:
                     print("Invalid stream number: enter int [0, 127]")
@@ -56,7 +62,21 @@ while True:
                     print("Invalid stream number: enter int [0, 127]")
 
     elif action_input == '3':
-        break
+        while True:
+            data = consumer_socket.receive_data_parsed()
+            packet_type = data[0]
+            header = data[1]
+            payload = data[2]
+            address = data[3]
+        
+            msgFromServer = "Received"
+            message_start = "Received from producer: "
+            
+            print(message_start + format(payload.decode('utf-8')))
+
+            # send a reply
+            consumer_socket.send_data_to(str.encode(msgFromServer), address)
+
             
     else:
         print("Invalid action")
