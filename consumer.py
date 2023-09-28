@@ -1,5 +1,10 @@
+import select, sys
 from header import *
 from send_data import *
+
+# Create a datagram socket
+UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+bufferSize = 1024
 
 # allows producer to continusly announce streams or publish content
 while True:
@@ -31,7 +36,7 @@ while True:
                         payload = str.encode(str("Unsubscribe request for all streams from: " + producer_ID.decode('utf-8')))
                     
                     header = make_header_3(packet_type, producer_ID)
-                    send_data(header + payload)
+                    send_data(header + payload, UDPServerSocket)
                 
                 elif 0 <= int(stream_input) <= 127:
                     valid = True
@@ -44,7 +49,7 @@ while True:
                         payload = str.encode(str("Unsubscribe request for stream: " + str(new_stream_number) + " from: " + producer_ID.decode('utf-8')))
                     
                     header = make_header_1(packet_type, producer_ID, new_stream_number)
-                    send_data(header + payload)
+                    send_data(header + payload, UDPServerSocket)
             
                 else:
                     print("Invalid stream number: enter int [0, 127]")
@@ -54,5 +59,7 @@ while True:
 
     elif action_input == '3':
         break
+            
     else:
         print("Invalid action")
+            

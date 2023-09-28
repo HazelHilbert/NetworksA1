@@ -2,7 +2,7 @@ Headers:
     packet_type
         1 --> producer anounces stream to broker
                 
-        2 --> producer broadcasts data to broker
+        2 --> producer broadcasts frame to broker
 
         3 --> consumer subscribes all
 
@@ -11,6 +11,8 @@ Headers:
         5 --> consumer subscribes to stream
 
         6 --> consumer unsubscribes to stream
+
+        7 --> broker fowards frame to consumer
 
 Making containers:
     docker create -ti --name broker --cap-add=all -v /Users/hazelhilbert/Documents/GitHub/NetworksA1:/compnets pythonimage /bin/bash

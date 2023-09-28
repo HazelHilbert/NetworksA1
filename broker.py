@@ -1,6 +1,7 @@
 import socket
 from client import *
 from header import *
+from send_data import *
 
 localIP     = "broker"
 localPort   = 50000
@@ -20,14 +21,14 @@ consumers = []
 # Listen for incoming datagrams
 while(True):
     print()
-    st = "Prod: "
-    for p in producers:
-        st += p.producer_id + " " 
-    print(st)
-    st = "Con: "
-    for c in consumers:
-        st += str(c.ip_address) + " " 
-    print(st)
+    #st = "Prod: "
+    #for p in producers:
+    #    st += p.producer_id + " " 
+    #print(st)
+    #st = "Con: "
+    #for c in consumers:
+    #    st += str(c.address) + " " 
+    #print(st)
     
     msgFromServer = "Received"
 
@@ -50,14 +51,14 @@ while(True):
             if producer.producer_id == producer_id:
                 known_producer = True
                 producer.add_stream(producer_id+stream_number)
-                print("producers streams")
-                producer.list_streams() #
+                #print("producers streams")
+                #producer.list_streams() #
         if not known_producer:
             new_producer = Producer(producer_id)
             new_producer.add_stream(producer_id+stream_number)
             producers.append(new_producer)
-            print("producers streams")
-            new_producer.list_streams()
+            #print("producers streams")
+            #new_producer.list_streams()
         
     elif packet_type == 2:
         message_start = "Received producer: "
@@ -84,11 +85,11 @@ while(True):
         
             known_consumer = False
             for consumer in consumers:
-                if address[0] == consumer.ip_address:
+                if address == consumer.address:
                     known_consumer = True
                     current_consumer = consumer
             if not known_consumer:
-                new_consumer = Consumer(address[0])
+                new_consumer = Consumer(address)
                 consumers.append(new_consumer)
                 current_consumer = new_consumer
             
@@ -107,8 +108,9 @@ while(True):
             elif packet_type == 6 and valid_stream:
                 message_start = "Consumer unsub stream: "
                 current_consumer.unsubscribe(producer_id+stream_number)
-            print("consumer subs")
-            current_consumer.list_subscriptions()
+            #print("consumer subs")
+            #current_consumer.list_subscriptions()
+    
     else:
         message_start = "ERROR "
 

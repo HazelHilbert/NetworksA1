@@ -15,8 +15,8 @@ class Producer:
         print(self.streams)
 
 class Consumer:
-    def __init__(self, ip_address):
-        self.ip_address = ip_address
+    def __init__(self, address):
+        self.address = address
         self.subscriptions = []
 
     def subscribe(self, producer_stream):
