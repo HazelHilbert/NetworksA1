@@ -22,7 +22,6 @@ while True:
 
     # Anounce stream
     if action_input == '1':
-        # packet_type (1 byte), producer ID (3 bytes) + stream number (1 byte)
         packet_type = 1
         valid = False
         while not valid:
@@ -38,18 +37,19 @@ while True:
                 if valid == False:
                     print("Invalid stream number: enter int [0, 127]")
 
-        #send to broker
-        # Construct header
+        # construct header
         header = make_header_1(packet_type, producer_ID, new_stream_number)
 
         # data payload
         payload = str.encode(str(producer_ID.decode('utf-8')) + ", adding stream: " + str(new_stream_number))
         
+        # send to broker
         producer_socket.send_data_to(header + payload, BROKER_ADDRESS)
 
     # Publish content
     elif action_input == '2':
         packet_type = 2
+        
         valid = False
         while not valid:
             try:
@@ -82,12 +82,13 @@ while True:
             for frame_name in list_of_frames:
                 payload_size = int(os.stat(os.getcwd() + '/' + folder_input + '/' + frame_name).st_size)
                 
-                # Construct header
+                # construct header
                 header = make_header_2(packet_type, producer_ID, stream_number, frame, payload_size)
 
                 # data payload
                 payload = str.encode(str(producer_ID.decode('utf-8')) + ", stream: " + str(stream_number) + ", frame: " + str(frame) + ", payload size: " + str(payload_size))
                 
+                # send to broker
                 producer_socket.send_data_to(header + payload, BROKER_ADDRESS)
 
                 frame += 1

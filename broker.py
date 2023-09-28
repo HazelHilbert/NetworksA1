@@ -4,7 +4,6 @@ from udm_socket import *
 
 broker_socket = UDM_Socket("broker")
 broker_socket.bind_to_address(BROKER_ADDRESS)
-
 print("UDP broker up and listening")
 
 producers = []
@@ -22,15 +21,13 @@ while(True):
     #    st += str(c.address) + " " 
     #print(st)
     
-    msgFromServer = "Received"
-
-    bytesAddressPair = broker_socket.receive_data()
-    data = bytesAddressPair[0]
-    address = bytesAddressPair[1]
+    data = broker_socket.receive_data()
     packet_type = data[0]
-
-    header = data[:get_header_length(data)]
-    payload = data[get_header_length(data):]
+    header = data[1]
+    payload = data[2]
+    address = data[3]
+    
+    msgFromServer = "Received"
 
     message_start = ''
     if packet_type == 1:
@@ -53,7 +50,7 @@ while(True):
             #new_producer.list_streams()
         
     elif packet_type == 2:
-        message_start = "Received producer: "
+        message_start = "Received from producer: "
     
     elif 3 <= packet_type <= 6:
         producer_id = get_producer_id(header)
@@ -106,11 +103,9 @@ while(True):
     else:
         message_start = "ERROR "
 
-    producertMsg = message_start + format(payload.decode('utf-8'))
-    producerIP  = "IP Address:{}".format(address)
-    
-    print(producertMsg)
-    print(producerIP)
+    # print received data
+    print(message_start + format(payload.decode('utf-8')))
+    print("IP Address:{}".format(address))
 
-    # Sending a reply
+    # send a reply
     broker_socket.send_data_to(str.encode(msgFromServer), address)
