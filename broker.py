@@ -51,7 +51,6 @@ while(True):
         
     elif packet_type == 2:
         message_start = "Received from producer: "
-
     
     elif 3 <= packet_type <= 6:
         producer_id = get_producer_id(header)
