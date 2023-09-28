@@ -1,6 +1,6 @@
 class Producer:
-    def __init__(self, producer_name):
-        self.producer_name = producer_name
+    def __init__(self, producer_id):
+        self.producer_id = producer_id
         self.streams = []
 
     def add_stream(self, stream_number):
@@ -29,11 +29,11 @@ class Consumer:
 
     def subscribeAll(self, producer):
         for stream in producer.streams:
-            self.subscribe(producer.producer_name+stream)
+            self.subscribe(stream)
 
     def unsubscribeAll(self, producer):
         for stream in producer.streams:
-            self.unsubscribe(producer.producer_name+stream)
+            self.unsubscribe(stream)
 
     def list_subscriptions(self):
         print(self.subscriptions)

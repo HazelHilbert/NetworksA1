@@ -11,5 +11,5 @@ def send_data(bytesToSend):
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
     msgFromServer = UDPClientSocket.recvfrom(bufferSize)
-    msg = "Message from broker {}".format(msgFromServer[0].decode('utf-8'))
+    msg = "Message from broker: {}".format(msgFromServer[0].decode('utf-8'))
     print(msg)

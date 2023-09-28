@@ -10,7 +10,7 @@ while True:
         # Ask for producer ID
         valid = False
         while not valid:
-            id_input = input("Enter producer ID to subscribe to: ")
+            id_input = input("Enter producer ID to subscribe/unsubscribe to: ")
             if len(id_input) == 6:
                 valid = True
                 producer_ID = id_input.encode('utf-8')
@@ -20,7 +20,7 @@ while True:
         valid = False
         while not valid:
             try:
-                stream_input = input("Enter stream number or 'all' to subscribe to all streams: ")
+                stream_input = input("Enter stream number or 'all' to subscribe/unsubscribe to all streams: ")
                 if stream_input == "all":
                     valid = True
                     if action_input == '1': 
