@@ -1,17 +1,9 @@
-import socket
 from client import *
 from header import *
-from send_data import *
+from udm_socket import *
 
-localIP     = "broker"
-localPort   = 50000
-bufferSize  = 1024
-
-# Create a datagram socket
-UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-
-# Bind to address and ip
-UDPServerSocket.bind((localIP, localPort))
+broker_socket = UDM_Socket("broker")
+broker_socket.bind_to_address(BROKER_ADDRESS)
 
 print("UDP broker up and listening")
 
@@ -32,7 +24,7 @@ while(True):
     
     msgFromServer = "Received"
 
-    bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
+    bytesAddressPair = broker_socket.receive_data()
     data = bytesAddressPair[0]
     address = bytesAddressPair[1]
     packet_type = data[0]
@@ -121,4 +113,4 @@ while(True):
     print(producerIP)
 
     # Sending a reply
-    UDPServerSocket.sendto(str.encode(msgFromServer), address)
+    broker_socket.send_data_to(str.encode(msgFromServer), address)

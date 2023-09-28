@@ -1,6 +1,6 @@
 import os 
 from header import *
-from send_data import *
+from udm_socket import *
 
 # Ask for producer ID
 valid = False
@@ -13,7 +13,7 @@ while not valid:
         print("Invalid ID: enter 6 char string")
 
 # Create a datagram socket
-UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+producer_socket = UDM_Socket("producer")
 
 stream_list = []
 # allows producer to continusly announce streams or publish content
@@ -45,7 +45,7 @@ while True:
         # data payload
         payload = str.encode(str(producer_ID.decode('utf-8')) + ", adding stream: " + str(new_stream_number))
         
-        send_data(header + payload, UDPServerSocket)
+        producer_socket.send_data_to(header + payload, BROKER_ADDRESS)
 
     # Publish content
     elif action_input == '2':
@@ -88,7 +88,7 @@ while True:
                 # data payload
                 payload = str.encode(str(producer_ID.decode('utf-8')) + ", stream: " + str(stream_number) + ", frame: " + str(frame) + ", payload size: " + str(payload_size))
                 
-                send_data(header + payload, UDPServerSocket)
+                producer_socket.send_data_to(header + payload, BROKER_ADDRESS)
 
                 frame += 1
 
