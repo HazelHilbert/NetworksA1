@@ -19,3 +19,10 @@ Making containers:
     docker network connect csnet broker
     docker start -i broker  
     python3 broker.py
+
+To capture trafic:
+    Broker:
+    tcpdump -i eth1 -w /compnets/capture.pcap &
+    nc -l -u 172.20.0.2 50000
+    Others:
+    nc -u 172.20.0.2 50000

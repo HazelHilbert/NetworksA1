@@ -77,7 +77,9 @@ while not quit:
             elif action_input == '3':
                 quit = True
                 break
-
+            else:
+                print("Invalid action")
+            
             print(menu)
         
         elif sock is consumer_socket.UDPSocket:
@@ -94,7 +96,4 @@ while not quit:
 
             # send a reply
             consumer_socket.send_data_to(str.encode(msgFromServer), address)
-
-    else:
-        print("Invalid action")
             
