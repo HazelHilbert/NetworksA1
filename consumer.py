@@ -28,10 +28,15 @@ while not quit:
                 while not valid:
                     id_input = input("Enter producer ID to subscribe/unsubscribe to: ")
                     if len(id_input) == 6:
-                        valid = True
-                        producer_ID = id_input.encode('utf-8')
+                        try:
+                            producer_ID = bytes.fromhex(id_input)
+                            producer_ID_string = str(producer_ID.hex().upper())
+                            valid = True
+                        except:
+                            print("Invalid ID: enter 6 char string representing a 3 byte hexadecimal number")
+                            continue
                     else:
-                        print("Invalid ID: enter 6 char string")
+                        print("Invalid ID: enter 6 char string representing a 3 byte hexadecimal number")
 
                 valid = False
                 while not valid:
@@ -41,10 +46,10 @@ while not quit:
                             valid = True
                             if action_input == '1': 
                                 packet_type = 3
-                                payload = str.encode(str("Subscription request for all streams from: " + producer_ID.decode('utf-8')))
+                                payload = str.encode("Subscription request for all streams from: " + producer_ID_string)
                             elif action_input == '2':
                                 packet_type = 4
-                                payload = str.encode(str("Unsubscribe request for all streams from: " + producer_ID.decode('utf-8')))
+                                payload = str.encode("Unsubscribe request for all streams from: " + producer_ID_string)
                             
                             header = make_header_3(packet_type, producer_ID)
                             consumer_socket.send_data_to(header + payload, BROKER_ADDRESS)
@@ -57,10 +62,10 @@ while not quit:
                             new_stream_number = int(stream_input)
                             if action_input == '1': 
                                 packet_type = 5
-                                payload = str.encode(str("Subscription request for stream: " + str(new_stream_number) + " from: " + producer_ID.decode('utf-8')))
+                                payload = str.encode("Subscription request for stream: " + str(new_stream_number) + " from: " + producer_ID_string)
                             elif action_input == '2':
                                 packet_type = 6
-                                payload = str.encode(str("Unsubscribe request for stream: " + str(new_stream_number) + " from: " + producer_ID.decode('utf-8')))
+                                payload = str.encode("Unsubscribe request for stream: " + str(new_stream_number) + " from: " + producer_ID_string)
                             
                             header = make_header_1(packet_type, producer_ID, new_stream_number)
                             consumer_socket.send_data_to(header + payload, BROKER_ADDRESS)
