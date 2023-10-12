@@ -15,7 +15,7 @@ Headers:
         7 --> broker fowards frame to consumer
 
 Making containers:
-    docker create -ti --name broker --cap-add=all -v /Users/hazelhilbert/Documents/GitHub/NetworksA1:/compnets pythonimage /bin/bash
+    docker create -ti --name broker --cap-add=all -v /Users/hazelhilbert/Documents/GitHub/NetworksA1:/compnets pbimg /bin/bash
     docker network connect csnet broker
     docker start -i broker  
     python3 broker.py

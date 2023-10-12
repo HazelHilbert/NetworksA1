@@ -16,11 +16,11 @@ def get_header_format(header):
         packet_type = header[0]
 
     if packet_type == 1 or packet_type == 5 or packet_type == 6:
-        header_format = 'b 6s b'
+        header_format = 'b 3s b'
     elif packet_type == 2 or packet_type == 7:
-        header_format = 'b 6s b i i'
+        header_format = 'b 3s b i i'
     elif packet_type == 3 or packet_type == 4:
-        header_format = 'b 6s'
+        header_format = 'b 3s'
 
     return header_format
     
@@ -28,7 +28,11 @@ def get_header_length(header):
     return struct.calcsize(get_header_format(header))
 
 def get_producer_id(header):
-    return str(struct.unpack(get_header_format(header), header)[1])
+    return str(struct.unpack(get_header_format(header), header)[1].hex().upper())
 
 def get_stream_number(header):
     return str(struct.unpack(get_header_format(header), header)[2])
+
+def get_frame_number(header):
+    return str(struct.unpack(get_header_format(header), header)[3])
+

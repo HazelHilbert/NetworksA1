@@ -104,11 +104,15 @@ while(True):
         message_start = "ERROR "
 
     # print received data
-    print(message_start + format(payload.decode('utf-8')))
-    print("IP Address:{}".format(address))
+    if packet_type != 2:
+        print(message_start + format(payload.decode('utf-8')))
+        print("IP Address:{}".format(address))
 
     # foward frames to consumers
     if packet_type == 2:
+        print(message_start + str(producer_id) + "; stream: " + str(stream_number) + "; frame: " + str(get_frame_number(header)))
+        print("IP Address:{}".format(address))
+
         producer_stream = get_producer_id(header) + get_stream_number(header)
         print("Fowarding stream to consumers")
         #new_header = 7 + header[1:]

@@ -7,10 +7,14 @@ valid = False
 while not valid:
     id_input = input("Enter producer ID: ")
     if len(id_input) == 6:
-        valid = True
-        producer_ID = id_input.encode('utf-8')
+        try:
+            producer_ID = bytes.fromhex(id_input)
+            valid = True
+        except:
+            print("Invalid ID: enter 6 char string representing a 3 byte hexadecimal number")
+            continue
     else:
-        print("Invalid ID: enter 6 char string")
+        print("Invalid ID: enter 6 char string representing a 3 byte hexadecimal number")
 
 # Create a datagram socket
 producer_socket = UDM_Socket("producer")
@@ -41,7 +45,7 @@ while True:
         header = make_header_1(packet_type, producer_ID, new_stream_number)
 
         # data payload
-        payload = str.encode(str(producer_ID.decode('utf-8')) + ", adding stream: " + str(new_stream_number))
+        payload = str.encode(str(producer_ID.hex().upper()) + ", adding stream: " + str(new_stream_number))
         
         # send to broker
         producer_socket.send_data_to(header + payload, BROKER_ADDRESS)
@@ -83,14 +87,17 @@ while True:
 
             frame = 1
             for frame_name in list_of_frames:
-                payload_size = int(os.stat(os.getcwd() + '/' + folder_input + '/' + frame_name).st_size)
+                current_frame_path = os.getcwd() + '/' + folder_input + '/' + frame_name
+                payload_size = int(os.stat(current_frame_path).st_size)
                 
                 # construct header
                 header = make_header_2(packet_type, producer_ID, stream_number, frame, payload_size)
 
                 # data payload
-                payload = str.encode(str(producer_ID.decode('utf-8')) + ", stream: " + str(stream_number) + ", frame: " + str(frame) + ", payload size: " + str(payload_size))
-                
+                #payload = str.encode(str(producer_ID.decode('utf-8')) + ", stream: " + str(stream_number) + ", frame: " + str(frame) + ", payload size: " + str(payload_size))
+                with open(current_frame_path, 'rb') as file:
+                    payload = file.read()
+
                 # send to broker
                 producer_socket.send_data_to(header + payload, BROKER_ADDRESS)
                 
