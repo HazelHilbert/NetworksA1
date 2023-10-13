@@ -17,7 +17,7 @@ def get_header_format(header):
 
     if packet_type == 1 or packet_type == 5 or packet_type == 6:
         header_format = 'b 3s b'
-    elif packet_type == 2 or packet_type == 7:
+    elif packet_type == 2 or packet_type == 7 or packet_type == 8:
         header_format = 'b 3s b i i'
     elif packet_type == 3 or packet_type == 4:
         header_format = 'b 3s'

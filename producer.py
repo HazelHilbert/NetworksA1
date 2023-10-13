@@ -55,7 +55,8 @@ while True:
 
     # Publish content
     elif action_input == '2':
-        packet_type = 2
+        packet_type_frame = 2
+        packet_type_audio = 8
         
         valid = False
         while not valid:
@@ -78,31 +79,53 @@ while True:
             valid = False
             while not valid:
                 try:
-                    folder_input = input("Enter folder to broadcast: ")
+                    folder_input = input("Enter folder with frames to broadcast: ")
                     list_of_frames = os.listdir(os.getcwd() + '/' + folder_input)
                     valid = True
                 except:
                     if (valid == False):
                         print("Could not find folder")
 
-            frame = 1
-            for frame_name in list_of_frames:
-                current_frame_path = os.getcwd() + '/' + folder_input + '/' + frame_name
-                payload_size = int(os.stat(current_frame_path).st_size)
-                
-                # construct header
-                header = make_header_2(packet_type, producer_ID, stream_number, frame, payload_size)
+            valid = False
+            while not valid:
+                try:
+                    audio_input = input("Enter audio to broadcast (or none): ")
+                    with open(audio_input, 'rb') as audio_file:
+                        audio_encode = audio_file.read()
+                    audio_chunk_size = len(audio_encode)//len(list_of_frames)
+                    has_audio = True
+                    valid = True
+                except:
+                    if audio_input == "none":
+                        has_audio = False
+                        valid = True
+                    elif (valid == False):
+                        print("Could not find audio file")
 
-                # data payload
-                #payload = str.encode(str(producer_ID.decode('utf-8')) + ", stream: " + str(stream_number) + ", frame: " + str(frame) + ", payload size: " + str(payload_size))
+            frame = 1
+            for i in range(len(list_of_frames)):
+                # get frame payload
+                current_frame_path = os.getcwd() + '/' + folder_input + '/' + list_of_frames[i]
+                payload_size_frame = int(os.stat(current_frame_path).st_size)
                 with open(current_frame_path, 'rb') as file:
-                    payload = file.read()
+                    payload_frame = file.read()
+
+                # construct frame header
+                header_frame = make_header_2(packet_type_frame, producer_ID, stream_number, frame, payload_size_frame)
 
                 # send to broker
-                producer_socket.send_data_to(header + payload, BROKER_ADDRESS)
+                producer_socket.send_data_to(header_frame + payload_frame, BROKER_ADDRESS)
                 
                 # get response
                 print("Message from broker: " + producer_socket.receive_data().decode('utf-8'))
+                
+                # send audio
+                if has_audio:
+                    payload_audio = audio_encode[i * audio_chunk_size:(i + 1) * audio_chunk_size]
+                    payload_size_audio = len(payload_audio)
+                    header_audio = make_header_2(packet_type_audio, producer_ID, stream_number, frame, payload_size_audio)
+                    producer_socket.send_data_to(header_audio + payload_audio, BROKER_ADDRESS)
+                    print("Message from broker: " + producer_socket.receive_data().decode('utf-8'))
 
                 frame += 1
 

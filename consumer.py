@@ -97,7 +97,12 @@ while not quit:
             msgFromServer = "Received"
             message_start = "Received from producer: "
             
-            print(message_start + format(payload.decode('utf-8')))
+            if packet_type == 2:
+                discription = "; frame: "
+            else:
+                discription = "; audio chunk: "
+
+            print(message_start + str(get_producer_id(header)) + "; stream: " + str(get_stream_number(header)) + discription + str(get_frame_number(header)))
 
             # send a reply
             consumer_socket.send_data_to(str.encode(msgFromServer), address)

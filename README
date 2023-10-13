@@ -2,7 +2,7 @@ Headers:
     packet_type
         1 --> producer anounces stream to broker
                 
-        2 --> producer broadcasts frame to broker
+        2 --> producer/broker broadcasts frame to broker/consumer
 
         3 --> consumer subscribes all
 
@@ -12,7 +12,7 @@ Headers:
 
         6 --> consumer unsubscribes to stream
 
-        7 --> broker fowards frame to consumer
+        8 --> producer/broker broadcasts audio chunck to broker/consumer
 
 Making containers:
     docker create -ti --name broker --cap-add=all -v /Users/hazelhilbert/Documents/GitHub/NetworksA1:/compnets pbimg /bin/bash
@@ -22,7 +22,7 @@ Making containers:
 
 To capture trafic:
     Broker:
-    tcpdump -i eth1 -w /compnets/capture.pcap &
+    tcpdump -i eth1 -w /Users/hazelhilbert/Desktop/capture.pcap &
     nc -l -u 172.20.0.2 50000
     Others:
     nc -u 172.20.0.2 50000

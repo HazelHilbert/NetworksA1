@@ -49,7 +49,7 @@ while(True):
             #print("producers streams")
             #new_producer.list_streams()
         
-    elif packet_type == 2:
+    elif packet_type == 2 or packet_type == 8:
         message_start = "Received from producer: "
     
     elif 3 <= packet_type <= 6:
@@ -104,13 +104,18 @@ while(True):
         message_start = "ERROR "
 
     # print received data
-    if packet_type != 2:
+    if packet_type != 2 and packet_type != 8:
         print(message_start + format(payload.decode('utf-8')))
         print("IP Address:{}".format(address))
 
     # foward frames to consumers
-    if packet_type == 2:
-        print(message_start + str(producer_id) + "; stream: " + str(stream_number) + "; frame: " + str(get_frame_number(header)))
+    else:
+        if packet_type == 2:
+            discription = "; frame: "
+        else:
+            discription = "; audio chunk: "
+
+        print(message_start + str(producer_id) + "; stream: " + str(stream_number) + discription + str(get_frame_number(header)))
         print("IP Address:{}".format(address))
 
         producer_stream = get_producer_id(header) + get_stream_number(header)
