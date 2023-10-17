@@ -1,6 +1,10 @@
 from client import *
 from header import *
 from udm_socket import *
+import crcmod.predefined
+
+# create a CRC-16 generator
+crc16 = crcmod.predefined.Crc('crc-16')
 
 broker_socket = UDM_Socket("broker")
 broker_socket.bind_to_address(BROKER_ADDRESS)
@@ -29,6 +33,20 @@ while(True):
     
     msgFromServer = "Received"
 
+    # check CRC-16 value
+    if packet_type == 2 or packet_type == 8:
+        # calculate the CRC-16 checksum for the received frame
+        received_crc = crc16(payload).to_bytes(2, byteorder='big')
+        expected_crc = get_crc_value(header)
+
+        # Verify the CRC checksum
+        if received_crc != expected_crc:
+            msgFromServer = "CRC checksum did not match. Frame may have errors."
+
+    # send a reply
+    broker_socket.send_data_to(str.encode(msgFromServer), address)
+
+    # handle frame/audio
     message_start = ''
     if packet_type == 1:
         message_start = "Announced producer: "
@@ -126,6 +144,4 @@ while(True):
                 broker_socket.send_data_to(header + payload, consumer.address)
                 print("Message from consumer " + str(consumer.address[0]) + ": " + broker_socket.receive_data().decode('utf-8'))
     
-    # send a reply
-    broker_socket.send_data_to(str.encode(msgFromServer), address)
 
