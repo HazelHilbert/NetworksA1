@@ -1,10 +1,8 @@
-import os 
+import os
+import random 
 from header import *
 from udm_socket import *
-import crcmod.predefined
-
-# create a CRC-16 generator
-crc16 = crcmod.predefined.Crc('crc-16')
+import zlib
 
 # Ask for producer ID
 valid = False
@@ -113,11 +111,15 @@ while True:
                 with open(current_frame_path, 'rb') as file:
                     payload_frame = file.read()
 
-                # calculate CRC-16 value of 2 bytes
-                crc_value_frame = crc16(payload_frame).to_bytes(2, byteorder='big')
-
+                # calculate CRC-32 value
+                crc_value_frame = zlib.crc32(payload_frame) & 0xFFFFFFFF
+        
                 # construct frame header
                 header_frame = make_header_2(packet_type_frame, producer_ID, stream_number, frame, crc_value_frame)
+
+                # ADDING FILE CURUPTION TO TEST ERROR PREDICTION
+                if random.random() < 0.1:
+                    payload_frame += b'010101'
 
                 # send to broker
                 producer_socket.send_data_to(header_frame + payload_frame, BROKER_ADDRESS)
@@ -128,8 +130,8 @@ while True:
                 # send audio
                 if has_audio:
                     payload_audio = audio_encode[i * audio_chunk_size:(i + 1) * audio_chunk_size]
-                    # calculate CRC-16 value of 2 bytes
-                    crc_value_audio = crc16(payload_audio).to_bytes(2, byteorder='big')
+                    # calculate CRC-32 value
+                    crc_value_audio = zlib.crc32(payload_audio) & 0xFFFFFFFF
                     header_audio = make_header_2(packet_type_audio, producer_ID, stream_number, frame, crc_value_audio)
                     producer_socket.send_data_to(header_audio + payload_audio, BROKER_ADDRESS)
                     print("Message from broker: " + producer_socket.receive_data().decode('utf-8'))

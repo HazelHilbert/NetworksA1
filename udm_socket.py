@@ -6,7 +6,7 @@ BROKER_ADDRESS = ("broker", 50000)
 class UDM_Socket:
     def __init__(self, name):
         self.UDPSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-        self.bufferSize = 1024
+        self.bufferSize = 65536
         self.name = name
 
     def bind_to_address(self, addressPort):

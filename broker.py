@@ -1,10 +1,7 @@
 from client import *
 from header import *
 from udm_socket import *
-import crcmod.predefined
-
-# create a CRC-16 generator
-crc16 = crcmod.predefined.Crc('crc-16')
+import zlib
 
 broker_socket = UDM_Socket("broker")
 broker_socket.bind_to_address(BROKER_ADDRESS)
@@ -16,15 +13,7 @@ consumers = []
 # Listen for incoming datagrams
 while(True):
     print()
-    #st = "Prod: "
-    #for p in producers:
-    #    st += p.producer_id + " " 
-    #print(st)
-    #st = "Con: "
-    #for c in consumers:
-    #    st += str(c.address) + " " 
-    #print(st)
-    
+
     data = broker_socket.receive_data_parsed()
     packet_type = data[0]
     header = data[1]
@@ -33,15 +22,15 @@ while(True):
     
     msgFromServer = "Received"
 
-    # check CRC-16 value
+    # check CRC-32 value
     if packet_type == 2 or packet_type == 8:
-        # calculate the CRC-16 checksum for the received frame
-        received_crc = crc16(payload).to_bytes(2, byteorder='big')
-        expected_crc = get_crc_value(header)
+        # calculate the CRC-32 checksum for the received frame
+        received_crc = int(zlib.crc32(payload))
+        expected_crc = int(get_crc_value(header))
 
         # Verify the CRC checksum
         if received_crc != expected_crc:
-            msgFromServer = "CRC checksum did not match. Frame may have errors."
+            msgFromServer = "CRC-32 checksum did not match"
 
     # send a reply
     broker_socket.send_data_to(str.encode(msgFromServer), address)
@@ -58,14 +47,10 @@ while(True):
             if producer.producer_id == producer_id:
                 known_producer = True
                 producer.add_stream(producer_id+stream_number)
-                #print("producers streams")
-                #producer.list_streams() #
         if not known_producer:
             new_producer = Producer(producer_id)
             new_producer.add_stream(producer_id+stream_number)
             producers.append(new_producer)
-            #print("producers streams")
-            #new_producer.list_streams()
         
     elif packet_type == 2 or packet_type == 8:
         message_start = "Received from producer: "
@@ -115,8 +100,6 @@ while(True):
             elif packet_type == 6 and valid_stream:
                 message_start = "Consumer unsub stream: "
                 current_consumer.unsubscribe(producer_id+stream_number)
-            #print("consumer subs")
-            #current_consumer.list_subscriptions()
     
     else:
         message_start = "ERROR "
