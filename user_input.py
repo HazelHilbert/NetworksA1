@@ -1,10 +1,13 @@
 import os
 
 # Ask for producer ID
-def input_producer_id():
+def input_producer_id(sub=False):
     valid = False
     while not valid:
-        id_input = input("Enter producer ID: ")
+        input_message = "Enter producer ID: "
+        if sub:
+            input_message = "Enter producer ID to subscribe/unsubscribe to: "
+        id_input = input(input_message)
         if len(id_input) == 6:
             try:
                 producer_ID = bytes.fromhex(id_input)
@@ -15,6 +18,9 @@ def input_producer_id():
         else:
             print("Invalid ID: enter 6 char string representing a 3 byte hexadecimal number")
     return producer_ID
+
+def input_producer_id_sub():
+    return input_producer_id(True)   
 
 # Anounce and add stream
 def input_new_stream(stream_list):

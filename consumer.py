@@ -2,6 +2,7 @@ import select
 import sys
 from header import *
 from udm_socket import *
+from user_input import *
 
 # Create a datagram socket
 consumer_socket = UDM_Socket("consumer")
@@ -23,20 +24,9 @@ while not quit:
 
             # Subscribe to Stream
             if action_input == '1' or action_input == '2':
-                # Ask for producer ID
-                valid = False
-                while not valid:
-                    id_input = input("Enter producer ID to subscribe/unsubscribe to: ")
-                    if len(id_input) == 6:
-                        try:
-                            producer_ID = bytes.fromhex(id_input)
-                            producer_ID_string = str(producer_ID.hex().upper())
-                            valid = True
-                        except:
-                            print("Invalid ID: enter 6 char string representing a 3 byte hexadecimal number")
-                            continue
-                    else:
-                        print("Invalid ID: enter 6 char string representing a 3 byte hexadecimal number")
+                # get producer ID to sub to
+                producer_ID = input_producer_id_sub()
+                producer_ID_string = str(producer_ID.hex().upper())
 
                 valid = False
                 while not valid:
