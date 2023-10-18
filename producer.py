@@ -128,8 +128,15 @@ while True:
                 producer_socket.send_data_to(header_frame + payload_frame, BROKER_ADDRESS)
                 
                 # get response
-                print("Message from broker: " + producer_socket.receive_data().decode('utf-8'))
-                
+                data = producer_socket.receive_data_parsed()
+                packet_type = data[0]
+                payload = data[2]
+
+                if packet_type == 7:
+                    print("Acknowledgement from broker: " + payload.decode('utf-8'))
+                else:
+                    print("DID NOT RECIVE ACKNOWLEDGMENT")
+
                 # send audio
                 if has_audio:
                     payload_audio = audio_encode[i * audio_chunk_size:(i + 1) * audio_chunk_size]

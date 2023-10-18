@@ -32,7 +32,10 @@ def get_header_length(header):
     return struct.calcsize(get_header_format(header))
 
 def get_producer_id(header):
-    return str(struct.unpack(get_header_format(header), header)[1].hex().upper())
+    return str(get_producer_id_bytes(header).hex().upper())
+
+def get_producer_id_bytes(header):
+    return struct.unpack(get_header_format(header), header)[1]
 
 def get_stream_number(header):
     return str(struct.unpack(get_header_format(header), header)[2])

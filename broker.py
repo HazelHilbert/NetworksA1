@@ -19,7 +19,9 @@ while(True):
     header = data[1]
     payload = data[2]
     address = data[3]
-   
+    producer_id = get_producer_id(header)
+    producer_id_bytes = get_producer_id_bytes(header)
+
     # handle stream anoucment and subscriptions
     if packet_type != 2 and packet_type != 8:
         msgFromServer = "Recived"
@@ -27,7 +29,6 @@ while(True):
         # Stream anouncement
         if packet_type == 1:
             message_start = "Announced producer: "
-            producer_id = get_producer_id(header)
             stream_number = get_stream_number(header)
 
             known_producer = False
@@ -42,8 +43,6 @@ while(True):
 
         # subscription handling
         elif 3 <= packet_type <= 6:
-            producer_id = get_producer_id(header)
-
             known_producer = False
             for producer in producers:
                 if producer.producer_id == producer_id:
@@ -118,8 +117,13 @@ while(True):
         # print which stream/audio chunck recived
         print(message_start + str(producer_id) + "; stream: " + str(stream_number) + discription + str(get_frame_number(header)))
         print("IP Address:{}".format(address))
+        
         # send reply
-        broker_socket.send_data_to(str.encode(msgFromServer), address)
+        stream_number = get_stream_number(header)
+        frame_number = get_frame_number(header)
+        header = make_header(7, producer_id_bytes, int(stream_number), int(frame_number))
+        payload = str.encode(msgFromServer)        
+        broker_socket.send_data_to(header + payload, address)
 
         # foward frames to consumers
         producer_stream = get_producer_id(header) + get_stream_number(header)
