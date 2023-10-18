@@ -1,5 +1,6 @@
 import os
-import random 
+import random
+import time 
 from header import *
 from udm_socket import *
 import zlib
@@ -20,6 +21,7 @@ while not valid:
 
 # Create a datagram socket
 producer_socket = UDM_Socket("producer")
+producer_socket.set_timeout(0.1)
 
 stream_list = []
 # allows producer to continusly announce streams or publish content
@@ -119,24 +121,33 @@ while True:
         
                 # construct frame header
                 header_frame = make_header(packet_type_frame, producer_ID, stream_number, i+1, crc_value_frame)
-
-                # ADDING FILE CURUPTION TO TEST ERROR PREDICTION
-                if random.random() < 0.1:
-                    payload_frame += b'01'
-
-                # send to broker
-                producer_socket.send_data_to(header_frame + payload_frame, BROKER_ADDRESS)
                 
-                # get response
-                data = producer_socket.receive_data_parsed()
-                packet_type = data[0]
-                payload = data[2]
+                response_received = False
+                tries = 0
+                while not response_received and tries < 3:
+                    tries += 1
+                    # ADDING FILE CORRUPTION TO TEST ERROR PREDICTION
+                    payload_frame_corrupted = payload_frame
+                    if random.random() < 0.1:
+                        payload_frame_corrupted += b'01'
 
-                if packet_type == 7:
-                    print("Acknowledgement from broker: " + payload.decode('utf-8'))
-                else:
-                    print("DID NOT RECIVE ACKNOWLEDGMENT")
-
+                    # send to broker
+                    producer_socket.send_data_to(header_frame + payload_frame_corrupted, BROKER_ADDRESS)
+                    
+                    # try to recive response
+                    response_received = False
+                    try:
+                        data = producer_socket.receive_data_parsed()
+                        packet_type = data[0]
+                        payload = data[2]
+                        if packet_type == 7:
+                            print("Acknowledgment from broker: " + payload.decode('utf-8'))
+                            response_received = True
+                        else:
+                            print("Negatice response, retransmitting frame", i + 1)
+                    except:
+                        print("No response in time, retransmitting frame", i + 1)
+                    
                 # send audio
                 if has_audio:
                     payload_audio = audio_encode[i * audio_chunk_size:(i + 1) * audio_chunk_size]
@@ -144,6 +155,7 @@ while True:
                     crc_value_audio = zlib.crc32(payload_audio) & 0xFFFFFFFF
                     header_audio = make_header(packet_type_audio, producer_ID, stream_number, i+1, crc_value_audio)
                     producer_socket.send_data_to(header_audio + payload_audio, BROKER_ADDRESS)
+                    # NEED TO CHANGE THIS
                     print("Message from broker: " + producer_socket.receive_data().decode('utf-8'))
 
     elif action_input == '3':

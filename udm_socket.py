@@ -11,6 +11,9 @@ class UDM_Socket:
 
     def bind_to_address(self, addressPort):
         self.UDPSocket.bind(addressPort)
+
+    def set_timeout(self, timeout):
+        self.UDPSocket.settimeout(timeout)
     
     def send_data_to(self, bytesToSend, addressPort):
         self.UDPSocket.sendto(bytesToSend, addressPort)
