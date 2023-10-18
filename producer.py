@@ -1,23 +1,10 @@
-import os
-import random
-import time 
+import os, random, zlib
 from header import *
 from udm_socket import *
-import zlib
+from user_input import *
 
 # Ask for producer ID
-valid = False
-while not valid:
-    id_input = input("Enter producer ID: ")
-    if len(id_input) == 6:
-        try:
-            producer_ID = bytes.fromhex(id_input)
-            valid = True
-        except:
-            print("Invalid ID: enter 6 char string representing a 3 byte hexadecimal number")
-            continue
-    else:
-        print("Invalid ID: enter 6 char string representing a 3 byte hexadecimal number")
+producer_ID = input_producer_id()
 
 # Create a datagram socket
 producer_socket = UDM_Socket("producer")
@@ -64,20 +51,10 @@ while True:
     # Anounce stream
     if action_input == '1':
         packet_type = 1
-        valid = False
-        while not valid:
-            try:
-                stream_input = int(input("Enter stream number: "))
-                if 0 <= stream_input <= 127:
-                    valid = True
-                    stream_list.append(stream_input)
-                    new_stream_number = stream_input
-                else:
-                    print("Invalid stream number: enter int [0, 127]")
-            except:
-                if valid == False:
-                    print("Invalid stream number: enter int [0, 127]")
 
+        # get stream input
+        new_stream_number = input_new_stream(stream_list)
+        
         # construct header
         header = make_header(packet_type, producer_ID, new_stream_number)
 
@@ -92,52 +69,18 @@ while True:
 
     # Publish content
     elif action_input == '2':
-        # Get input for strem number
-        valid = False
-        while not valid:
-            try:
-                stream_input = int(input("Enter stream number: "))
-                if 0 <= stream_input <= 127:
-                    if stream_list.__contains__(stream_input):
-                        valid = True
-                        stream_number = stream_input
-                    else:
-                        print("Please announce stream before publishing content")
-                        break
-                else:
-                    print("Invalid stream number: enter int [0, 127]")
-            except:
-                if valid == False:
-                    print("Invalid stream number: enter int [0, 127]")
+        # Get input for stream number
+        stream_number = input_stream(stream_list)
 
-        if valid == True:
+        if stream_number >= 0:
             # get input for frames
-            valid = False
-            while not valid:
-                try:
-                    folder_input = input("Enter folder with frames to broadcast: ")
-                    list_of_frames = os.listdir(os.getcwd() + '/' + folder_input)
-                    valid = True
-                except:
-                    if (valid == False):
-                        print("Could not find folder")
+            result_input_frames = input_frames()
+            folder_input = result_input_frames[0]
+            list_of_frames = result_input_frames[1]
             
             # get input for audio
-            valid = False
-            while not valid:
-                try:
-                    audio_input = input("Enter audio to broadcast (or none): ")
-                    with open(audio_input, 'rb') as audio_file:
-                        audio_encode = audio_file.read()
-                    audio_chunk_size = len(audio_encode)//len(list_of_frames)
-                    has_audio = True
-                    valid = True
-                except:
-                    if audio_input == "none":
-                        has_audio = False
-                        valid = True
-                    elif (valid == False):
-                        print("Could not find audio file")
+            result_input_audio = input_audio(list_of_frames)
+            has_audio = result_input_audio[0]
             
             packet_type_frame = 2
             packet_type_audio = 8
@@ -153,10 +96,12 @@ while True:
 
                 # send audio data
                 if has_audio:
+                    audio_encode = result_input_audio[1]
+                    audio_chunk_size = result_input_audio[2]
                     payload_audio = audio_encode[i * audio_chunk_size:(i + 1) * audio_chunk_size]
                     send_data(packet_type_audio, producer_ID, stream_number, i+1, payload_audio)
-                    
+
     elif action_input == '3':
         break
     else:
-        print("Invalid action")      
+        print("Invalid action")
