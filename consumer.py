@@ -51,7 +51,7 @@ while not quit:
                                 packet_type = 4
                                 payload = str.encode("Unsubscribe request for all streams from: " + producer_ID_string)
                             
-                            header = make_header_3(packet_type, producer_ID)
+                            header = make_header(packet_type, producer_ID)
                             consumer_socket.send_data_to(header + payload, BROKER_ADDRESS)
                             
                             # get response
@@ -67,7 +67,7 @@ while not quit:
                                 packet_type = 6
                                 payload = str.encode("Unsubscribe request for stream: " + str(new_stream_number) + " from: " + producer_ID_string)
                             
-                            header = make_header_1(packet_type, producer_ID, new_stream_number)
+                            header = make_header(packet_type, producer_ID, new_stream_number)
                             consumer_socket.send_data_to(header + payload, BROKER_ADDRESS)
                             
                             # get response

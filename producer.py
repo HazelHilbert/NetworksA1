@@ -44,7 +44,7 @@ while True:
                     print("Invalid stream number: enter int [0, 127]")
 
         # construct header
-        header = make_header_1(packet_type, producer_ID, new_stream_number)
+        header = make_header(packet_type, producer_ID, new_stream_number)
 
         # data payload
         payload = str.encode(str(producer_ID.hex().upper()) + ", adding stream: " + str(new_stream_number))
@@ -118,7 +118,7 @@ while True:
                 crc_value_frame = zlib.crc32(payload_frame) & 0xFFFFFFFF
         
                 # construct frame header
-                header_frame = make_header_2(packet_type_frame, producer_ID, stream_number, i+1, crc_value_frame)
+                header_frame = make_header(packet_type_frame, producer_ID, stream_number, i+1, crc_value_frame)
 
                 # ADDING FILE CURUPTION TO TEST ERROR PREDICTION
                 if random.random() < 0.1:
@@ -135,7 +135,7 @@ while True:
                     payload_audio = audio_encode[i * audio_chunk_size:(i + 1) * audio_chunk_size]
                     # calculate CRC-32 value
                     crc_value_audio = zlib.crc32(payload_audio) & 0xFFFFFFFF
-                    header_audio = make_header_2(packet_type_audio, producer_ID, stream_number, i+1, crc_value_audio)
+                    header_audio = make_header(packet_type_audio, producer_ID, stream_number, i+1, crc_value_audio)
                     producer_socket.send_data_to(header_audio + payload_audio, BROKER_ADDRESS)
                     print("Message from broker: " + producer_socket.receive_data().decode('utf-8'))
 
