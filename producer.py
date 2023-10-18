@@ -23,6 +23,39 @@ while not valid:
 producer_socket = UDM_Socket("producer")
 producer_socket.set_timeout(0.1)
 
+# sends data with flow control
+def send_data(packet_type, producer_ID, stream_number, frame_number, payload):
+    # calculate CRC-32 value
+    crc_value = zlib.crc32(payload) & 0xFFFFFFFF
+
+    # construct header
+    header = make_header(packet_type, producer_ID, stream_number, frame_number, crc_value)
+    
+    response_received = False
+    tries = 0
+    while not response_received and tries < 3:
+        tries += 1
+        # ADDING FILE CORRUPTION TO TEST ERROR PREDICTION
+        payload_corrupted = payload
+        if random.random() < 0.1:
+            payload_corrupted += b'01'
+
+        # send to broker
+        producer_socket.send_data_to(header + payload_corrupted, BROKER_ADDRESS)
+        
+        # try to recive response
+        try:
+            response_data = producer_socket.receive_data_parsed()
+            response_packet_type = response_data[0]
+            response_payload = response_data[2]
+            if response_packet_type == 7:
+                print("Acknowledgment from broker: " + response_payload.decode('utf-8'))
+                response_received = True
+            else:
+                print("Negatice response, retransmitting frame", frame_number)
+        except:
+            print("No response in time, retransmitting frame", frame_number)
+  
 stream_list = []
 # allows producer to continusly announce streams or publish content
 while True:
@@ -59,9 +92,6 @@ while True:
 
     # Publish content
     elif action_input == '2':
-        packet_type_frame = 2
-        packet_type_audio = 8
-        
         # Get input for strem number
         valid = False
         while not valid:
@@ -108,7 +138,9 @@ while True:
                         valid = True
                     elif (valid == False):
                         print("Could not find audio file")
-
+            
+            packet_type_frame = 2
+            packet_type_audio = 8
             # broadcast frames/audio
             for i in range(len(list_of_frames)):
                 # get frame payload
@@ -116,49 +148,15 @@ while True:
                 with open(current_frame_path, 'rb') as file:
                     payload_frame = file.read()
 
-                # calculate CRC-32 value
-                crc_value_frame = zlib.crc32(payload_frame) & 0xFFFFFFFF
-        
-                # construct frame header
-                header_frame = make_header(packet_type_frame, producer_ID, stream_number, i+1, crc_value_frame)
-                
-                response_received = False
-                tries = 0
-                while not response_received and tries < 3:
-                    tries += 1
-                    # ADDING FILE CORRUPTION TO TEST ERROR PREDICTION
-                    payload_frame_corrupted = payload_frame
-                    if random.random() < 0.1:
-                        payload_frame_corrupted += b'01'
+                # send frame data
+                send_data(packet_type_frame, producer_ID, stream_number, i+1, payload_frame)
 
-                    # send to broker
-                    producer_socket.send_data_to(header_frame + payload_frame_corrupted, BROKER_ADDRESS)
-                    
-                    # try to recive response
-                    response_received = False
-                    try:
-                        data = producer_socket.receive_data_parsed()
-                        packet_type = data[0]
-                        payload = data[2]
-                        if packet_type == 7:
-                            print("Acknowledgment from broker: " + payload.decode('utf-8'))
-                            response_received = True
-                        else:
-                            print("Negatice response, retransmitting frame", i + 1)
-                    except:
-                        print("No response in time, retransmitting frame", i + 1)
-                    
-                # send audio
+                # send audio data
                 if has_audio:
                     payload_audio = audio_encode[i * audio_chunk_size:(i + 1) * audio_chunk_size]
-                    # calculate CRC-32 value
-                    crc_value_audio = zlib.crc32(payload_audio) & 0xFFFFFFFF
-                    header_audio = make_header(packet_type_audio, producer_ID, stream_number, i+1, crc_value_audio)
-                    producer_socket.send_data_to(header_audio + payload_audio, BROKER_ADDRESS)
-                    # NEED TO CHANGE THIS
-                    print("Message from broker: " + producer_socket.receive_data().decode('utf-8'))
-
+                    send_data(packet_type_audio, producer_ID, stream_number, i+1, payload_audio)
+                    
     elif action_input == '3':
         break
     else:
-        print("Invalid action")
+        print("Invalid action")      

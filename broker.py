@@ -98,6 +98,11 @@ while(True):
 
     # handle frame/audio 
     else:
+        if packet_type == 2:
+            discription = " frame: "
+        else:
+            discription = " audio chunk: "
+
         # calculate the CRC-32 checksum for the received frame
         received_crc = int(zlib.crc32(payload))
         expected_crc = int(get_crc_value(header))
@@ -106,19 +111,14 @@ while(True):
             msgFromServer = "CRC-32 checksum did not match"
             message_start = "ERROR: Received corrupted from producer: "
         else:
-            msgFromServer = "Recived frame: " + str(get_frame_number(header))
+            msgFromServer = "Recived" + discription + str(get_frame_number(header))
             message_start = "Received from producer: "
-
-        if packet_type == 2:
-            discription = "; frame: "
-        else:
-            discription = "; audio chunk: "
         
         # print which stream/audio chunck recived
-        print(message_start + str(producer_id) + "; stream: " + str(stream_number) + discription + str(get_frame_number(header)))
+        print(message_start + str(producer_id) + "; stream: " + str(stream_number) + ";" + discription + str(get_frame_number(header)))
         print("IP Address:{}".format(address))
         
-        # send reply if not corupted
+        # send reply and foward if not corupted
         if received_crc == expected_crc:
             stream_number = get_stream_number(header)
             frame_number = get_frame_number(header)
