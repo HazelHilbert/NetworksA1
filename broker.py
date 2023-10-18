@@ -131,5 +131,5 @@ while(True):
             print("Fowarding stream to consumers")
             for consumer in consumers:
                 if producer_stream in consumer.subscriptions:
-                    broker_socket.send_data_to(header + payload, consumer.address)
-                    print("Message from consumer " + str(consumer.address[0]) + ": " + broker_socket.receive_data().decode('utf-8'))
+                    # send data to each consumer and wait for responses
+                    send_data(int(packet_type), producer_id_bytes, int(stream_number), int(frame_number), payload, broker_socket, consumer.address)
