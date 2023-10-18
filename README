@@ -12,6 +12,8 @@ Headers:
 
         6 --> consumer unsubscribes to stream
 
+        7 --> acknowledgement frame/audio
+
         8 --> producer/broker broadcasts audio chunck to broker/consumer
 
 Making containers:

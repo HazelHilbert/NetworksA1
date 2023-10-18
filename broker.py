@@ -19,12 +19,6 @@ while(True):
     header = data[1]
     payload = data[2]
     address = data[3]
-    
-
-    # send a reply
-
-    # handle frame/audio
-    #message_start = ''
    
     # handle stream anoucment and subscriptions
     if packet_type != 2 and packet_type != 8:

@@ -60,6 +60,7 @@ while True:
         packet_type_frame = 2
         packet_type_audio = 8
         
+        # Get input for strem number
         valid = False
         while not valid:
             try:
@@ -78,6 +79,7 @@ while True:
                     print("Invalid stream number: enter int [0, 127]")
 
         if valid == True:
+            # get input for frames
             valid = False
             while not valid:
                 try:
@@ -87,7 +89,8 @@ while True:
                 except:
                     if (valid == False):
                         print("Could not find folder")
-
+            
+            # get input for audio
             valid = False
             while not valid:
                 try:
@@ -104,7 +107,7 @@ while True:
                     elif (valid == False):
                         print("Could not find audio file")
 
-            frame = 1
+            # broadcast frames/audio
             for i in range(len(list_of_frames)):
                 # get frame payload
                 current_frame_path = os.getcwd() + '/' + folder_input + '/' + list_of_frames[i]
@@ -115,7 +118,7 @@ while True:
                 crc_value_frame = zlib.crc32(payload_frame) & 0xFFFFFFFF
         
                 # construct frame header
-                header_frame = make_header_2(packet_type_frame, producer_ID, stream_number, frame, crc_value_frame)
+                header_frame = make_header_2(packet_type_frame, producer_ID, stream_number, i+1, crc_value_frame)
 
                 # ADDING FILE CURUPTION TO TEST ERROR PREDICTION
                 if random.random() < 0.1:
@@ -132,11 +135,9 @@ while True:
                     payload_audio = audio_encode[i * audio_chunk_size:(i + 1) * audio_chunk_size]
                     # calculate CRC-32 value
                     crc_value_audio = zlib.crc32(payload_audio) & 0xFFFFFFFF
-                    header_audio = make_header_2(packet_type_audio, producer_ID, stream_number, frame, crc_value_audio)
+                    header_audio = make_header_2(packet_type_audio, producer_ID, stream_number, i+1, crc_value_audio)
                     producer_socket.send_data_to(header_audio + payload_audio, BROKER_ADDRESS)
                     print("Message from broker: " + producer_socket.receive_data().decode('utf-8'))
-
-                frame += 1
 
     elif action_input == '3':
         break
