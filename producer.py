@@ -119,7 +119,7 @@ while True:
 
                 # ADDING FILE CURUPTION TO TEST ERROR PREDICTION
                 if random.random() < 0.1:
-                    payload_frame += b'010101'
+                    payload_frame += b'01'
 
                 # send to broker
                 producer_socket.send_data_to(header_frame + payload_frame, BROKER_ADDRESS)
