@@ -1,5 +1,4 @@
-import select
-import sys
+import select, sys, zlib
 from header import *
 from udm_socket import *
 from user_input import *

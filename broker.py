@@ -1,7 +1,7 @@
+import zlib
 from client import *
 from header import *
 from udm_socket import *
-import zlib
 
 broker_socket = UDM_Socket("broker")
 broker_socket.bind_to_address(BROKER_ADDRESS)
