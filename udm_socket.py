@@ -33,6 +33,8 @@ class UDM_Socket:
     
 # sends data with flow control
 def send_data(packet_type, producer_ID, stream_number, frame_number, payload, sender_socket, receiver_address):
+    sender_socket.set_timeout(0.1)
+    
     # calculate CRC-32 value
     crc_value = zlib.crc32(payload) & 0xFFFFFFFF
 
@@ -45,7 +47,7 @@ def send_data(packet_type, producer_ID, stream_number, frame_number, payload, se
         tries += 1
         # ADDING FILE CORRUPTION TO TEST ERROR PREDICTION
         payload_corrupted = payload
-        if random.random() < 0.25:
+        if random.random() < 0.1:
             payload_corrupted += b'01'
 
         # send to broker
@@ -57,9 +59,12 @@ def send_data(packet_type, producer_ID, stream_number, frame_number, payload, se
             response_packet_type = response_data[0]
             response_payload = response_data[2]
             if response_packet_type == 7:
-                print("Acknowledgment from broker: " + response_payload.decode('utf-8'))
+                print("Acknowledgment: " + response_payload.decode('utf-8'))
                 response_received = True
             else:
                 print("Negative response, retransmitting frame", frame_number)
         except:
             print("No response in time, retransmitting frame", frame_number)
+    
+    sender_socket.set_timeout(None)
+    

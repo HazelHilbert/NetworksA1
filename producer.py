@@ -8,7 +8,6 @@ producer_ID = input_producer_id()
 
 # Create a datagram socket
 producer_socket = UDM_Socket("producer")
-producer_socket.set_timeout(0.1)
   
 stream_list = []
 # allows producer to continusly announce streams or publish content
