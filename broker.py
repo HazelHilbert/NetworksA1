@@ -116,7 +116,7 @@ while(True):
         
         # print which stream/audio chunck recived
         print(message_start + str(producer_id) + "; stream: " + str(stream_number) + ";" + discription + str(get_frame_number(header)))
-        print("IP Address:{}".format(address))
+        #print("IP Address:{}".format(address))
         
         # send reply and foward if not corupted
         if received_crc == expected_crc:
